@@ -1,4 +1,8 @@
 using WorldRank;
+using NLog;
+
+var logger = LogManager.GetCurrentClassLogger();
+logger.Info("App started");
 
 var playerRepo = new InMemoryPlayerRepository();
 var walletRepo = new InMemoryWalletRepository();
@@ -32,12 +36,16 @@ while (true)
 	};
 
 	if (action is null)
+	{
+		LogManager.Shutdown();
 		return; 
+	}
 	action();
 }
 
 void AddPlayer()
 {
+	logger.Info("Action: AddPlayer");
 	Console.Write("Name: ");
 	var name = Console.ReadLine();
 	if (string.IsNullOrWhiteSpace(name))
@@ -64,6 +72,7 @@ void AddPlayer()
 
 void ListPlayers()
 {
+	logger.Info("Action: ListPlayers");
 	var all = playerRepo.GroupPlayersByScore().SelectMany(g =>g);
 	if (!all.Any())
 	{
@@ -76,6 +85,7 @@ void ListPlayers()
 
 void FindPlayer()
 {
+	logger.Info("Action: FindPlayer");
 	Console.Write("Player Id: ");
     if (!int.TryParse(Console.ReadLine(), out var id))
     {
@@ -89,6 +99,7 @@ void FindPlayer()
 
 void DeletePlayer()
 {
+	logger.Info("Action: DeletePlayer");
 	Console.Write("Player Id: ");
 	if (!int.TryParse(Console.ReadLine(), out var id))
 	{
@@ -102,6 +113,7 @@ void DeletePlayer()
 
 void AddWallet()
 {
+	logger.Info("Action: AddWallet");
 	Console.Write ("Player ID: ");
 	if (!int.TryParse(Console.ReadLine(), out var playerId))
 	{
@@ -128,6 +140,7 @@ void AddWallet()
 
 void DepositWallet()
 {
+	logger.Info("Action: DepositWallet");
 	Console.Write("Player ID: ");
 	if (!int.TryParse(Console.ReadLine(), out var playerId))
 	{
@@ -162,6 +175,7 @@ void DepositWallet()
 
 void WithdrawWallet()
 {
+	logger.Info("Action: WithdrawWallet");
 	Console.Write("Player ID: ");
 	if (!int.TryParse(Console.ReadLine(), out var playerId))
 	{
@@ -202,6 +216,7 @@ void WithdrawWallet()
 }
 void ListWallet()
 {
+	logger.Info("Action: ListWallet");
 	Console.Write("Player ID: ");
 	if (!int.TryParse(Console.ReadLine(), out var playerId))
 	{
