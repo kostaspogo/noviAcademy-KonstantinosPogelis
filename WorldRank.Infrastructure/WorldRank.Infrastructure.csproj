@@ -5,6 +5,10 @@
     <ProjectReference Include="..\WorldRank.Domain\WorldRank.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="NLog" Version="6.1.4" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>

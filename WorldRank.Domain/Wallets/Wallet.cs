@@ -59,6 +59,14 @@ namespace WorldRank.Domain
 			Balance = newBalance;
 		}
 
+
+		public void ForceSubtractFunds(decimal amount)
+		{
+			if (amount <= 0)
+				throw new InvalidAmountException(amount);
+
+			Balance -= amount;
+		}
 		public override string ToString() => $"Balance -> {Balance} Currency -> {Currency} IsBlocked -> {IsBlocked}";
 	}
 }

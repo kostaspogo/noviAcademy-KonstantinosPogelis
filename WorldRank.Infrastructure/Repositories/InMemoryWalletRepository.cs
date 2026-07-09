@@ -1,9 +1,10 @@
 using NLog;
+using WorldRank.Application.Interfaces;
 using WorldRank.Domain;
 using WorldRank.Domain.Enums;
 using WorldRank.Domain.Exceptions;
 
-namespace WorldRank.Console
+namespace WorldRank.Infrastructure.Repositories
 {
 	public class InMemoryWalletRepository : IWalletRepository
 	{
@@ -27,6 +28,18 @@ namespace WorldRank.Console
 		public List<Wallet> GetAllWalletsByPlayerId(int playerId)
 		{
 			return _wallets.Where(item => item.PlayerId == playerId).ToList();
+		}
+
+		public Wallet GetWallet(int playerId, Currency currency)
+		{
+			var wallet = _wallets.SingleOrDefault(item => item.PlayerId == playerId && item.Currency == currency);
+
+			if (wallet is null)
+			{
+				throw new WalletNotFoundException(playerId, currency);
+			}
+
+			return wallet;
 		}
 
 		public void UpdateBalance(int playerId, Currency currency, decimal newBalance)
@@ -59,18 +72,6 @@ namespace WorldRank.Console
 		{
 			GetWallet(playerId, currency).Unblock();
 			_logger.Info("Player {PlayerId} {Currency} wallet unblocked", playerId, currency);
-		}
-
-		private Wallet GetWallet(int playerId, Currency currency)
-		{
-			var wallet = _wallets.SingleOrDefault(item => item.PlayerId == playerId && item.Currency == currency);
-
-			if (wallet is null)
-			{
-				throw new WalletNotFoundException(playerId, currency);
-			}
-
-			return wallet;
 		}
 	}
 }
