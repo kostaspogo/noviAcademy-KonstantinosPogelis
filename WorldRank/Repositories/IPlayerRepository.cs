@@ -1,10 +1,15 @@
-namespace WorldRank;
-
-public interface IPlayerRepository
-
+﻿namespace WorldRank.Console
 {
-    void AddPlayer(Player p);
-    Player? FindPlayer (int playerId);
-    bool DeletePlayer(int playerId);
-    IEnumerable<IGrouping<int, Player>> GroupPlayersByScore();
+	public interface IPlayerRepository
+	{
+		void AddPlayer(Player player);
+
+		IEnumerable<Player> GetAllPlayers();
+
+		void DeletePlayer(int playerId);
+
+		Player? FindPlayer(int playerId);
+
+		IEnumerable<IGrouping<int, Player>> GroupPlayersByScore();
+	}
 }
