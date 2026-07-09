@@ -1,3 +1,6 @@
 <Solution>
+  <Project Path="WorldRank.Application/WorldRank.Application.csproj" />
+  <Project Path="WorldRank.Domain/WorldRank.Domain.csproj" />
+  <Project Path="WorldRank.Infrastructure/WorldRank.Infrastructure.csproj" />
   <Project Path="WorldRank/WorldRank.csproj" />
 </Solution>
