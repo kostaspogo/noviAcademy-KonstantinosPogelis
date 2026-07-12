@@ -5,6 +5,7 @@ namespace WorldRank.Domain
 {
 	public class Wallet : IWallet
 	{
+		public int Id { get; set; }
 		public Currency Currency { get; }
 		public int PlayerId { get; }
 		public decimal Balance { get; private set; }
