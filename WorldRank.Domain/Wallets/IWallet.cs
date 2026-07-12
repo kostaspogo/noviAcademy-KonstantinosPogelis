@@ -1,6 +1,6 @@
-using WorldRank.Console.Enums;
+using WorldRank.Domain.Enums;
 
-namespace WorldRank.Console
+namespace WorldRank.Domain
 {
 	public interface IWallet
 	{
@@ -14,5 +14,6 @@ namespace WorldRank.Console
 		void SetBalance(decimal balance);
 		void Deposit(decimal amount);
 		void Withdraw(decimal amount);
+		void ForceSubtractFunds(decimal amount);
 	}
 }

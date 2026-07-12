@@ -1,13 +1,21 @@
+using Microsoft.Extensions.DependencyInjection;
 using NLog;
-using WorldRank.Console;
-using WorldRank.Console.Enums;
-using WorldRank.Console.Exceptions;
+using WorldRank.Application.Interfaces;
+using WorldRank.Infrastructure;
+using WorldRank.Domain;
+using WorldRank.Domain.Enums;
+using WorldRank.Domain.Exceptions;
 
 var logger = LogManager.GetCurrentClassLogger();
 
-//Wallets are stored in their own repository and reference the player via PlayerId
-IWalletRepository walletRepository = new InMemoryWalletRepository();
-IPlayerRepository playerRepository = new InMemoryPlayerRepository();
+// DI container. Ο διακόπτης: useDatabase=true -> SQL Server (EF Core), false -> InMemory.
+// Αλλάζεις ΜΟΝΟ αυτή τη μία παράμετρο — ο υπόλοιπος κώδικας δεν αγγίζεται.
+var services = new ServiceCollection();
+services.AddInfrastructure(useDatabase: true);
+var provider = services.BuildServiceProvider();
+
+IPlayerRepository playerRepository = provider.GetRequiredService<IPlayerRepository>();
+IWalletRepository walletRepository = provider.GetRequiredService<IWalletRepository>();
 
 logger.Info("Application started.");
 
