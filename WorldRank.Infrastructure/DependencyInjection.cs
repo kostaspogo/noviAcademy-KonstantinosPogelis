@@ -15,7 +15,7 @@ namespace WorldRank.Infrastructure
             if (useDatabase)
             {
                 services.AddDbContext<WorldRankDbContext>(options =>
-                    options.UseSqlServer("Server=localhost,1433;Database=NoviAcademyCodeFirst;User Id=sa;Password=Novibet!2025;TrustServerCertificate=true"));
+                    options.UseSqlServer("Server=localhost;Database=NoviAcademyCodeFirst;Integrated Security=true;TrustServerCertificate=true"));
 
                 // Τα DB repos εξαρτώνται από τον DbContext (Scoped) -> Scoped.
                 services.AddScoped<IPlayerRepository, DBPlayerRepository>();
