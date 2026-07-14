@@ -11,7 +11,7 @@ namespace WorldRank.Infrastructure.Persistence.Context
         {
             // Mac / Docker SQL Server (sa auth). Στα Windows: Server=localhost;...;Integrated Security=true;TrustServerCertificate=true
             var options = new DbContextOptionsBuilder<WorldRankDbContext>()
-                .UseSqlServer("Server=localhost,1433;Database=NoviAcademyCodeFirst;User Id=sa;Password=Novibet!2025;TrustServerCertificate=true")
+                .UseSqlServer("Server=localhost;Database=NoviAcademyCodeFirst;Integrated Security=true;TrustServerCertificate=true")
                 .Options;
 
             return new WorldRankDbContext(options);
