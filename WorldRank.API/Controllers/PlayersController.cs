@@ -1,53 +1,49 @@
+using Microsoft.AspNetCore.Mvc;
+using WorldRank.API.Dtos;
 using WorldRank.Application.Interfaces;
 using WorldRank.Domain;
-using Microsoft.AspNetCore.Mvc;
 
 namespace WorldRank.API.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("players")]
     public class PlayersController : ControllerBase
     {
+        private readonly IPlayerService _players;
 
-        private readonly IPlayerRepository _playerRepository;
-        
-        public PlayersController(IPlayerRepository playerRepository)
+        public PlayersController(IPlayerService players)
         {
-            _playerRepository = playerRepository;
+            _players = players;
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreatePlayerRequest request, CancellationToken ct)
+        {
+            Player player;
+            try
+            {
+                player = await _players.CreateAsync(request.Name, request.Score, ct);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+
+            return CreatedAtAction(nameof(GetById), new { id = player.Id }, PlayerResponse.From(player));
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetById(int id, CancellationToken ct)
+        {
+            var player = await _players.GetByIdAsync(id, ct);
+            return player is null ? NotFound() : Ok(PlayerResponse.From(player));
+        }
+
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll(CancellationToken ct)
         {
-            try
-            {
-                var result = _playerRepository
-                    .GetAllPlayers()
-                    .ToList();
-
-                if (result.Count == 0)
-                    return NotFound();
-
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-
-        [HttpGet("{playerId:int}")]
-        public IActionResult GetPlayerById(int playerId)
-        {
-            try
-            {
-                var result = _playerRepository.FindPlayer(playerId);
-                if (result == null) return NotFound();
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            var players = await _players.GetAllAsync(ct);
+            return Ok(players.Select(PlayerResponse.From));
         }
     }
 }

@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Caching.Memory;
 using NLog;
 using WorldRank.Application.Interfaces;
 using WorldRank.Domain;
@@ -9,61 +8,47 @@ namespace WorldRank.Infrastructure.Repositories
 	{
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-		private readonly IMemoryCache _cache;
+		private readonly List<Player> _players = new List<Player>();
 
-		private List<Player> _players;
-
-		public InMemoryPlayerRepository(IMemoryCache cache)
-		{
-			_players = new List<Player>();
-			_cache = cache;
-		}
-
-		public void AddPlayer(Player player)
+		public Task AddPlayerAsync(Player player, CancellationToken ct = default)
 		{
 			_players.Add(player);
 			_logger.Info("Player {PlayerId} ({Name}) added with score {Score}", player.Id, player.Name, player.Score);
+			return Task.CompletedTask;
 		}
 
-
-        public IEnumerable<Player> GetAllPlayers()
-        {
-            if (_cache.TryGetValue("AllPlayersKey", out IReadOnlyList<Player>? cached) && cached is not null)
-            {
-                return cached;
-            }
-
-            var players = _players.ToList();
-
-            _cache.Set("AllPlayersKey", players, TimeSpan.FromSeconds(60));
-
-            return players;
-        }
-
-        public void DeletePlayer(int playerId)
+		public Task<IReadOnlyList<Player>> GetAllPlayersAsync(CancellationToken ct = default)
 		{
-			var player = _players.Where(item => item.Id == playerId).FirstOrDefault();
+			return Task.FromResult<IReadOnlyList<Player>>(_players.ToList());
+		}
+
+		public Task DeletePlayerAsync(int playerId, CancellationToken ct = default)
+		{
+			var player = _players.FirstOrDefault(item => item.Id == playerId);
 
 			if (player is null)
 			{
 				_logger.Warn("Delete skipped: player {PlayerId} not found", playerId);
-				return;
+				return Task.CompletedTask;
 			}
 
 			_players.Remove(player);
 			_logger.Info("Player {PlayerId} deleted", playerId);
+			return Task.CompletedTask;
 		}
 
-		public Player? FindPlayer(int playerId)
+		public Task<Player?> FindPlayerAsync(int playerId, CancellationToken ct = default)
 		{
-			return _players.Where(item => item.Id == playerId).FirstOrDefault();
+			return Task.FromResult(_players.FirstOrDefault(item => item.Id == playerId));
 		}
 
-		public IEnumerable<IGrouping<int, Player>> GroupPlayersByScore()
+		public Task<IEnumerable<IGrouping<int, Player>>> GroupPlayersByScoreAsync(CancellationToken ct = default)
 		{
-			return _players
+			IEnumerable<IGrouping<int, Player>> grouped = _players
 				.GroupBy(player => player.Score)
 				.OrderByDescending(group => group.Key);
+
+			return Task.FromResult(grouped);
 		}
 	}
 }

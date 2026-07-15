@@ -118,7 +118,7 @@ decimal? PromptAmount(string label)
 // Generates a random, unique player id (avoids collisions with already-registered players).
 int GeneratePlayerId()
 {
-	var existingIds = playerRepository.GetAllPlayers().Select(p => p.Id).ToHashSet();
+	var existingIds = playerRepository.GetAllPlayersAsync().GetAwaiter().GetResult().Select(p => p.Id).ToHashSet();
 
 	int id;
 	do
@@ -168,13 +168,13 @@ void AddPlayer()
 
 	var player = new Player(GeneratePlayerId(), name);
 	player.AddScore(score);
-	playerRepository.AddPlayer(player);
+	playerRepository.AddPlayerAsync(player).GetAwaiter().GetResult();
 	Console.WriteLine("Player added successfully.");
 }
 
 void ListPlayers()
 {
-	var all = playerRepository.GetAllPlayers().ToList();
+	var all = playerRepository.GetAllPlayersAsync().GetAwaiter().GetResult().ToList();
 
 	if (all.Count == 0)
 	{
@@ -188,7 +188,7 @@ void ListPlayers()
 
 void ListPlayersByScore()
 {
-	var groups = playerRepository.GroupPlayersByScore().ToList();
+	var groups = playerRepository.GroupPlayersByScoreAsync().GetAwaiter().GetResult().ToList();
 
 	if (groups.Count == 0)
 	{
@@ -209,7 +209,7 @@ void FindPlayerByName()
 	Console.Write("Search by name: ");
 	var term = Console.ReadLine() ?? string.Empty;
 
-	var player = playerRepository.GetAllPlayers()
+	var player = playerRepository.GetAllPlayersAsync().GetAwaiter().GetResult()
 		.FirstOrDefault(p => p.Name.Equals(term, StringComparison.OrdinalIgnoreCase));
 
 	Console.WriteLine(player is null ? "No player found." : player.ToString());
@@ -221,7 +221,7 @@ void FindPlayerById()
 	if (playerId is null)
 		return;
 
-	var player = playerRepository.FindPlayer(playerId.Value);
+	var player = playerRepository.FindPlayerAsync(playerId.Value).GetAwaiter().GetResult();
 
 	Console.WriteLine(player is null ? "No player found." : player.ToString());
 }
@@ -232,7 +232,7 @@ void DeletePlayer()
 	if (playerId is null)
 		return;
 
-	playerRepository.DeletePlayer(playerId.Value);
+	playerRepository.DeletePlayerAsync(playerId.Value).GetAwaiter().GetResult();
 	Console.WriteLine("Player deleted (if it existed).");
 }
 
@@ -256,11 +256,11 @@ void AddWalletToPlayer()
 
 	try
 	{
-		if (playerRepository.FindPlayer(playerId.Value) is null)
+		if (playerRepository.FindPlayerAsync(playerId.Value).GetAwaiter().GetResult() is null)
 			throw new PlayerNotFoundException(playerId.Value);
 
 		var wallet = new Wallet(playerId.Value, currency.Value, balance.Value);
-		walletRepository.Add(wallet);
+		walletRepository.AddAsync(wallet).GetAwaiter().GetResult();
 		Console.WriteLine("Wallet added successfully.");
 	}
 	catch (PlayerNotFoundException ex)
@@ -281,7 +281,7 @@ void GetWalletsOfPlayer()
 	if (playerId is null)
 		return;
 
-	var wallets = walletRepository.GetAllWalletsByPlayerId(playerId.Value);
+	var wallets = walletRepository.GetAllWalletsByPlayerIdAsync(playerId.Value).GetAwaiter().GetResult().ToList();
 
 	if (wallets.Count == 0)
 	{
@@ -309,7 +309,7 @@ void DepositToWallet()
 
 	RunWalletOperation(() =>
 	{
-		walletRepository.Deposit(playerId.Value, currency.Value, amount.Value);
+		walletRepository.DepositAsync(playerId.Value, currency.Value, amount.Value).GetAwaiter().GetResult();
 		Console.WriteLine("Deposit successful.");
 	});
 }
@@ -330,7 +330,7 @@ void WithdrawFromWallet()
 
 	RunWalletOperation(() =>
 	{
-		walletRepository.Withdraw(playerId.Value, currency.Value, amount.Value);
+		walletRepository.WithdrawAsync(playerId.Value, currency.Value, amount.Value).GetAwaiter().GetResult();
 		Console.WriteLine("Withdrawal successful.");
 	});
 }
@@ -347,7 +347,7 @@ void BlockWallet()
 
 	RunWalletOperation(() =>
 	{
-		walletRepository.Block(playerId.Value, currency.Value);
+		walletRepository.BlockAsync(playerId.Value, currency.Value).GetAwaiter().GetResult();
 		Console.WriteLine("Wallet blocked.");
 	});
 }
@@ -364,7 +364,7 @@ void UnblockWallet()
 
 	RunWalletOperation(() =>
 	{
-		walletRepository.Unblock(playerId.Value, currency.Value);
+		walletRepository.UnblockAsync(playerId.Value, currency.Value).GetAwaiter().GetResult();
 		Console.WriteLine("Wallet unblocked.");
 	});
 }
@@ -385,7 +385,7 @@ void UpdateWalletBalance()
 
 	RunWalletOperation(() =>
 	{
-		walletRepository.UpdateBalance(playerId.Value, currency.Value, newBalance.Value);
+		walletRepository.UpdateBalanceAsync(playerId.Value, currency.Value, newBalance.Value).GetAwaiter().GetResult();
 		Console.WriteLine("Balance updated.");
 	});
 }

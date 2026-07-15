@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using NLog;
 using WorldRank.Application.Interfaces;
 using WorldRank.Domain;
@@ -18,21 +19,21 @@ namespace WorldRank.Infrastructure.Repositories
             _context = context;
         }
 
-        public void AddPlayer(Player player)
+        public async Task AddPlayerAsync(Player player, CancellationToken ct = default)
         {
             _context.Player.Add(player);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync(ct);
             _logger.Info("Player {PlayerId} ({Name}) added with score {Score}", player.Id, player.Name, player.Score);
         }
 
-        public IEnumerable<Player> GetAllPlayers()
+        public async Task<IReadOnlyList<Player>> GetAllPlayersAsync(CancellationToken ct = default)
         {
-            return _context.Player.ToList();
+            return await _context.Player.ToListAsync(ct);
         }
 
-        public void DeletePlayer(int playerId)
+        public async Task DeletePlayerAsync(int playerId, CancellationToken ct = default)
         {
-            var player = _context.Player.FirstOrDefault(item => item.Id == playerId);
+            var player = await _context.Player.FirstOrDefaultAsync(item => item.Id == playerId, ct);
 
             if (player is null)
             {
@@ -41,20 +42,20 @@ namespace WorldRank.Infrastructure.Repositories
             }
 
             _context.Player.Remove(player);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync(ct);
             _logger.Info("Player {PlayerId} deleted", playerId);
         }
 
-        public Player? FindPlayer(int playerId)
+        public async Task<Player?> FindPlayerAsync(int playerId, CancellationToken ct = default)
         {
-            return _context.Player.FirstOrDefault(item => item.Id == playerId);
+            return await _context.Player.FirstOrDefaultAsync(item => item.Id == playerId, ct);
         }
 
-        public IEnumerable<IGrouping<int, Player>> GroupPlayersByScore()
+        public async Task<IEnumerable<IGrouping<int, Player>>> GroupPlayersByScoreAsync(CancellationToken ct = default)
         {
             // Το grouping γίνεται client-side (AsEnumerable) γιατί το EF δεν μεταφράζει IGrouping σε SQL.
-            return _context.Player
-                .AsEnumerable()
+            var players = await _context.Player.ToListAsync(ct);
+            return players
                 .GroupBy(player => player.Score)
                 .OrderByDescending(group => group.Key);
         }
