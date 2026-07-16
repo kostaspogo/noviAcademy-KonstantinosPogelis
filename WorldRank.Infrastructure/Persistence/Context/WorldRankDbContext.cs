@@ -9,6 +9,7 @@ namespace WorldRank.Infrastructure.Persistence.Context
     {
         public DbSet<Player> Player { get; set; }
         public DbSet<Wallet> Wallets { get; set; }
+        public DbSet<CurrencyRates> CurrencyRates { get; set; }
 
         public WorldRankDbContext(DbContextOptions<WorldRankDbContext> options)
             : base(options)
@@ -37,6 +38,16 @@ namespace WorldRank.Infrastructure.Persistence.Context
                 x.Property(y => y.IsBlocked).IsRequired();
                 // Ένα wallet ανά (player, currency) — ο ίδιος κανόνας με το InMemory.
                 x.HasIndex(y => new { y.PlayerId, y.Currency }).IsUnique();
+            });
+
+            modelBuilder.Entity<CurrencyRates>(x =>
+            {
+                x.ToTable("CurrencyRates");
+                // Σύνθετο κλειδί: μία ισοτιμία ανά (νόμισμα, ημερομηνία).
+                x.HasKey(y => new { y.Currency, y.Date });
+                x.Property(y => y.Currency).HasMaxLength(3).IsRequired();
+                x.Property(y => y.Rate).HasColumnType("decimal(18,6)").IsRequired();
+                x.Property(y => y.Date).IsRequired();
             });
 
             base.OnModelCreating(modelBuilder);

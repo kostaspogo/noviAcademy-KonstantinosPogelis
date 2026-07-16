@@ -2,6 +2,7 @@
   <Project Path="WorldRank.API/WorldRank.API.csproj" Id="50a3846c-876a-4314-8af7-99313e0847fe" />
   <Project Path="WorldRank.Application/WorldRank.Application.csproj" />
   <Project Path="WorldRank.Domain/WorldRank.Domain.csproj" />
+  <Project Path="WorldRank.Gateway/WorldRank.Gateway.csproj" Id="22a2d411-a1a8-4513-ac91-5a0d16af852b" />
   <Project Path="WorldRank.Infrastructure/WorldRank.Infrastructure.csproj" />
   <Project Path="WorldRank/WorldRank.csproj" />
 </Solution>
