@@ -1,11 +1,21 @@
 using System.Text.Json.Serialization;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using NLog.Extensions.Logging;
+using WorldRank.Application;
 using WorldRank.Application.Interfaces;
 using WorldRank.Application.Services;
 using WorldRank.Infrastructure;
 using WorldRank.Infrastructure.Caching;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
+builder.Host.ConfigureContainer<ContainerBuilder>(container =>
+{
+    container.RegisterModule(new ApplicationModule());
+    container.RegisterModule(new InfrastructureModule());
+});
 
 builder.Logging.ClearProviders();
 builder.Logging.AddNLog("nlog.config");

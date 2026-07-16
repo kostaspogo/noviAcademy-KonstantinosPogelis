@@ -1,7 +1,8 @@
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using WorldRank.API.Dtos;
-using WorldRank.Application.Interfaces;
-using WorldRank.Domain;
+using WorldRank.Application.Commands.Players;
+using WorldRank.Application.Queries.Players;
 
 namespace WorldRank.API.Controllers
 {
@@ -9,40 +10,40 @@ namespace WorldRank.API.Controllers
     [Route("players")]
     public class PlayersController : ControllerBase
     {
-        private readonly IPlayerService _players;
+        private readonly IMediator _mediator;
 
-        public PlayersController(IPlayerService players)
+        public PlayersController(IMediator mediator)
         {
-            _players = players;
+            _mediator = mediator;
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreatePlayerRequest request, CancellationToken ct)
         {
-            Player player;
+            int id;
             try
             {
-                player = await _players.CreateAsync(request.Name, request.Score, ct);
+                id = await _mediator.Send(new CreatePlayerCommand(request.Name, request.Score), ct);
             }
             catch (ArgumentException ex)
             {
                 return BadRequest(new { error = ex.Message });
             }
 
-            return CreatedAtAction(nameof(GetById), new { id = player.Id }, PlayerResponse.From(player));
+            return CreatedAtAction(nameof(GetById), new { id }, null);
         }
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id, CancellationToken ct)
         {
-            var player = await _players.GetByIdAsync(id, ct);
+            var player = await _mediator.Send(new GetPlayerByIdQuery(id), ct);
             return player is null ? NotFound() : Ok(PlayerResponse.From(player));
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll(CancellationToken ct)
         {
-            var players = await _players.GetAllAsync(ct);
+            var players = await _mediator.Send(new GetAllPlayersQuery(), ct);
             return Ok(players.Select(PlayerResponse.From));
         }
     }
